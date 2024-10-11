@@ -1,10 +1,10 @@
 #include <stdio.h> 
 #include <stdlib.h>
-#include <time.h>
 
-const char Player = 'X';
-const char Computer = 'O';
+const char Player1 = 'X';
+const char Player2 = 'O';
 char board[3][3];
+int turns;
 
 void resetBoard() {
     for (int i = 0; i < 3; i++) {
@@ -26,40 +26,30 @@ void printBoard() {
 
 void playerMove() {
     int x, y;
-    
+
     while (1) {
         printf("Select row (1-3): ");
         if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
-            printf("Invalid input! Please select a row between 1 and 3.\n");
+            puts("Invalid input! Please select a row between 1 and 3.");
             while (getchar() != '\n');
             continue;
         }
 
         printf("Select column (1-3): ");
         if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
-            printf("Invalid input! Please select a column between 1 and 3.\n");
+            puts("Invalid input! Please select a column between 1 and 3.");
             while (getchar() != '\n');
             continue;
         }
 
         if (board[x - 1][y - 1] != ' ') {
-            printf("That spot is already taken! Please select another spot.\n");
+            puts("That spot is already taken! Please select another spot.");
             continue;
         }
 
-        board[x - 1][y - 1] = Player;
+        board[x - 1][y - 1] = (turns %2 == 0) ? Player1 : Player2;
         break;
     }
-}
-
-void computerMove() {
-    int x, y;
-    do {
-        x = rand() % 3;
-        y = rand() % 3;
-    } while (board[x][y] != ' ');
-    board[x][y] = Computer;
-    printf("The computer has placed %c in (%d;%d)\n", Computer, (x + 1), (y + 1));
 }
 
 int checkEmptySpaces() {
@@ -95,10 +85,10 @@ char checkWinner() {
 void declareWinner(char Winner) {
     switch (Winner) {
         case 'X':
-            puts("The player wins");
+            puts("Player 1 wins");
             break;
         case 'O':
-            puts("The computer wins");
+            puts("Player 2 wins");
             break;
         case ' ':
             puts("It's a draw! Everybody loses!");
@@ -111,19 +101,12 @@ void declareWinner(char Winner) {
 
 int main() {
     char winner = ' ';
-    srand(time(NULL));
     resetBoard(); 
     printBoard(); 
 
     while (winner == ' ' && checkEmptySpaces() > 0) {
         playerMove(); 
-        printBoard(); 
-        winner = checkWinner();
-        if (winner != ' ' || checkEmptySpaces() == 0) {
-            break;
-        }
-
-        computerMove(); 
+        turns++;
         printBoard(); 
         winner = checkWinner();
         if (winner != ' ' || checkEmptySpaces() == 0) {
