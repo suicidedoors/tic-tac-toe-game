@@ -15,29 +15,38 @@ void resetBoard() {
 }
 
 void printBoard() {
-    printf("  %c  |  %c  |  %c  \n", board[0][0], board[0][1], board[0][2]);
-    printf(" ___ | ___ | ___\n");
-    printf("  %c  |  %c  |  %c  \n", board[1][0], board[1][1], board[1][2]);
-    printf(" ___ | ___ | ___\n");
-    printf("  %c  |  %c  |  %c  \n", board[2][0], board[2][1], board[2][2]);
+    for (int i = 0; i < 3; i++) {
+        printf("  %c  |  %c  |  %c  \n", board[i][0], board[i][1], board[i][2]);
+        if (i < 2) {
+            printf(" ___ | ___ | ___\n");
+        }
+    }
     printf("\n");
 }
 
 void playerMove() {
     int x, y;
+    
     while (1) {
         printf("Select row (1-3): ");
-        scanf(" %d", &x);
+        if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
+            printf("Invalid input! Please select a row between 1 and 3.\n");
+            while (getchar() != '\n');
+            continue;
+        }
+
         printf("Select column (1-3): ");
-        scanf(" %d", &y);
-        if (x < 1 || x > 3 || y < 1 || y > 3) {
-            printf("Invalid input! Please select row and column between 1 and 3.\n");
+        if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
+            printf("Invalid input! Please select a column between 1 and 3.\n");
+            while (getchar() != '\n');
             continue;
         }
+
         if (board[x - 1][y - 1] != ' ') {
-            printf("That spot is invalid! Please select another spot.\n");
+            printf("That spot is already taken! Please select another spot.\n");
             continue;
         }
+
         board[x - 1][y - 1] = Player;
         break;
     }
@@ -86,16 +95,16 @@ char checkWinner() {
 void declareWinner(char Winner) {
     switch (Winner) {
         case 'X':
-            printf("The player wins\n");
+            puts("The player wins");
             break;
         case 'O':
-            printf("The computer wins\n");
+            puts("The computer wins");
             break;
         case ' ':
-            printf("It's a draw! Everybody loses!\n");
+            puts("It's a draw! Everybody loses!");
             break;
         default:
-            printf("how\n");
+            puts("how");
             break;
     }
 }
