@@ -2,9 +2,26 @@
 #include <stdlib.h>
 
 #define SIZE 3
+
+
 const char Player1 = 'X';
 const char Player2 = 'O';
+
+const int Winning_Combinations[8][3][2] = {
+    {{0, 0}, {0, 1}, {0, 2}},
+    {{1, 0}, {1, 1}, {1, 2}},
+    {{2, 0}, {2, 1}, {2, 2}},
+
+    {{0, 0}, {1, 0}, {2, 0}},
+    {{0, 1}, {1, 1}, {2, 1}},
+    {{0, 2}, {1, 2}, {2, 2}},
+
+    {{0, 0}, {1, 1}, {2, 2}},
+    {{0, 2}, {1, 1}, {2, 0}}
+    };
+    
 int turns;
+
 
 typedef struct {
     char squares[SIZE][SIZE];
@@ -16,6 +33,12 @@ typedef struct {
     char game_winner;
 } big_board;
 
+typedef struct {
+    int col;
+    int row;
+} last_move;
+
+last_move lm;
 big_board bb;
 
 void resetBoard() {
@@ -24,8 +47,7 @@ void resetBoard() {
             for (int k = 0; k < SIZE; k++){
                 for (int l = 0; l < SIZE; l++)
                 {
-                    //                    bb.boards[i][j].squares[k][l] = ' ');
-                    bb.boards[i][j].squares[k][l] = (turns % 2 ? 'X' : 'O');
+                    bb.boards[i][j].squares[k][l] = ' ';
                     turns++;
                 }
             }
@@ -34,81 +56,104 @@ void resetBoard() {
     bb.game_winner = ' ';
 }
 
-//MIGHT fix this later
 
 void printBoard() {
     for (int i = 0; i < SIZE; i++) {
         for (int k = 0; k < SIZE; k++) {
-                printf(" %c %c %c | %c %c %c | %c %c %c \n", 
-                    bb.boards[i][0].squares[0][k],
-                    bb.boards[i][0].squares[1][k],
-                    bb.boards[i][0].squares[2][k],
+            printf(" %c %c %c | %c %c %c | %c %c %c \n", 
+                bb.boards[i][0].squares[k][0],
+                bb.boards[i][0].squares[k][1],
+                bb.boards[i][0].squares[k][2],
 
-                    bb.boards[i][1].squares[0][k],
-                    bb.boards[i][1].squares[1][k],
-                    bb.boards[i][1].squares[2][k],
+                bb.boards[i][1].squares[k][0],
+                bb.boards[i][1].squares[k][1],
+                bb.boards[i][1].squares[k][2],
 
-                    bb.boards[i][2].squares[0][k],
-                    bb.boards[i][2].squares[1][k],
-                    bb.boards[i][2].squares[2][k]);
+                bb.boards[i][2].squares[k][0],
+                bb.boards[i][2].squares[k][1],
+                bb.boards[i][2].squares[k][2]);
         }
-
         if (i < 2) {
             printf("_______|_______|_______\n");
         }
-        if (i == 1 || i == 0){
+        if (i == 1 || i == 0) {
             printf("       |       |       \n");
         }
     }
 }
 
+void playerMove(char board[SIZE][SIZE]) {
+    int x, y; 
+
+    while (1) {
+        printf("Select row (1-3): ");
+        if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
+            puts("Invalid input! Please select a row between 1 and 3.");
+            while (getchar() != '\n');
+            continue;
+        }
+
+        printf("Select column (1-3): ");
+        if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
+            puts("Invalid input! Please select a column between 1 and 3.");
+            while (getchar() != '\n');
+            continue;
+        }
+        x--;
+        y--;
+        if (board[x][y] != ' ') {
+            puts("That spot is already taken! Please select another spot.");
+            continue;
+        }
+
+        board[x][y] = (turns %2 == 0) ? Player1 : Player2;
+        lm.col = y;
+        lm.row = x;
+
+        break;
+    }
+}
+
+
+
+char (*pickBoard())[SIZE]{
+    if (lm.row == ' ' || bb.boards[lm.row][lm.col].winner != ' '){
+        int board_row, board_col;
+        puts("You can choose any board for your next move.");
+        printf("Pick next board Row (1-3): ");
+        scanf("%d", &board_row);
+        printf("Pick next board Column: ");
+        scanf("%d", &board_col);
+        lm.row = board_row - 1;
+        lm.col = board_col - 1;
+    }
+    return bb.boards[lm.row][lm.col].squares;
+}
+
+
+void checkWinner(){
+    
+}
+
 
 int main() {
+    char game_board[SIZE][SIZE];        //board where the next move will take place
+
     resetBoard();
-    printBoard();
+    while (bb.game_winner == ' ') {
+        printBoard();
+        char (*game_board)[SIZE] = pickBoard();
+        playerMove(game_board);
+        checkWinner();
+        turns++;
+    }
+
+    printf("Winner: %d", bb.game_winner);
     return 0;
 }
 
 
-// void playerMove( board ) {
-//     int x, y; 
 
-//     while (1) {
-//         printf("Select row (1-3): ");
-//         if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
-//             puts("Invalid input! Please select a row between 1 and 3.");
-//             while (getchar() != '\n');
-//             continue;
-//         }
-
-//         printf("Select column (1-3): ");
-//         if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
-//             puts("Invalid input! Please select a column between 1 and 3.");
-//             while (getchar() != '\n');
-//             continue;
-//         }
-
-//         if (board[x - 1][y - 1] != ' ') {
-//             puts("That spot is already taken! Please select another spot.");
-//             continue;
-//         }
-
-//         board[x - 1][y - 1] = (turns %2 == 0) ? Player1 : Player2;
-//         break;
-//     }
-// }
-
-// int checkEmptySpaces() {
-//     int empty_spaces = 0;
-//     for (int i = 0; i < 3; i++) {
-//         for (int j = 0; j < 3; j++) {
-//             if (board[i][j] == ' ') {
-//                 empty_spaces += 1;  
-//             }
-//         }
-//     }
-//     return empty_spaces; 
-// }
 
 // char checkWinner() {
 //     if (board[0][0] == board[1][1] && board[0][0] == board[2][2] && board[0][0] != ' ') {
@@ -126,51 +171,5 @@ int main() {
 //         }
 //     }
 //     return ' ';
-// }
-
-// void declareWinner(char Winner) {
-//     switch (Winner) {
-//         case 'X':
-//             puts("Player 1 wins");
-//             break;
-//         case 'O':
-//             puts("Player 2 wins");
-//             break;
-//         case ' ':
-//             puts("It's a draw! Everybody loses!");
-//             break;
-//         default:
-//             puts("how");
-//             break;
-//     }
-// }
-
-// int main() {
-//     char winner = ' ';
-//     resetBoard(); 
-//     printBoard(); 
-
-//     while (winner == ' ' && checkEmptySpaces() > 0) {
-//         playerMove(); 
-//         turns++;
-//         printBoard(); 
-//         winner = checkWinner();
-//         if (winner != ' ' || checkEmptySpaces() == 0) {
-//             break;
-//         }
-//     }
-//     declareWinner
-// void resetBoard() {
-//     for (int i = 0; i < SIZE; i++){
-//         for (int j = 0; i < SIZE; j++){
-//             for (int k = 0; k < SIZE; k++){
-//                 for (int l = 0; l < SIZE; l++)
-//                 {
-//                     big_board.>boards[i][j].cells[k][l] = ' ';
-//                 }
-//             }
-//         }
-//     }
-//     big_board->game_winner = ' ';
 // }
 
