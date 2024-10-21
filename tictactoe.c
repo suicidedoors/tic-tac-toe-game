@@ -86,21 +86,24 @@ void playerMove(char board[SIZE][SIZE]) {
     while (1) {
         printf("Select row (1-3): ");
         if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
-            puts("Invalid input! Please select a row between 1 and 3.");
+            printBoard();
+            puts("\033[31mInvalid input! Please select a row between 1 and 3.\033[0m");
             while (getchar() != '\n');
             continue;
         }
 
         printf("Select column (1-3): ");
         if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
-            puts("Invalid input! Please select a column between 1 and 3.");
+            printBoard();
+            puts("\033[31mInvalid input! Please select a column between 1 and 3.\033[0m");
             while (getchar() != '\n');
             continue;
         }
         x--;
         y--;
         if (board[x][y] != ' ') {
-            puts("That spot is already taken! Please select another spot.");
+            printBoard();
+            puts("\033[31mThat spot is already taken! Please select another spot.\033[0m");
             continue;
         }
 
@@ -115,10 +118,10 @@ void playerMove(char board[SIZE][SIZE]) {
 char (*pickBoard())[SIZE] {
     if (lm.row < 0 || lm.row >= SIZE || bb.boards[lm.row][lm.col].winner != ' ') {
         int board_row, board_col;
-        puts("You can choose any board for your next move.");
-        printf("Pick next board Row (1-3): ");
+        puts("\033[38;5;227mYou can choose any board for your next move.\033[0m");
+        printf("\033[38;5;227mPick next board Row (1-3): \033[0m");
         scanf("%d", &board_row);
-        printf("Pick next board Column (1-3): ");
+        printf("\033[38;5;227mPick next board Column (1-3): \033[0m");
         scanf("%d", &board_col);
         lm.row = board_row - 1;
         lm.col = board_col - 1;
@@ -161,10 +164,12 @@ void checkWinner() {
 }
 
 int main() {
+    puts("*** Welcome to Ultimate Tictactoe! ***\n");
     resetBoard();
     while (bb.game_winner == ' ') {
         printBoard();
         char (*game_board)[SIZE] = pickBoard();
+        printf("\033[38;5;208mNow playing on board (%d,%d)\033[0m\n", (lm.row + 1),(lm.col + 1));
         playerMove(game_board);
         checkWinner();
     }
