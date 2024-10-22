@@ -2,6 +2,10 @@
 #include <stdlib.h>
 
 #define SIZE 3
+#define RED "\033[31m"
+#define YELLOW "\033[38;5;227m"
+#define ORANGE "\033[38;5;208m"
+#define RESET "\033[0m"
 
 const char Player1 = 'X';
 const char Player2 = 'O';
@@ -58,7 +62,7 @@ void resetBoard() {
 void printBoard() {
     for (int i = 0; i < SIZE; i++) {
         for (int k = 0; k < SIZE; k++) {
-            printf(" %c %c %c | %c %c %c | %c %c %c \n", 
+            printf("\t %c %c %c | %c %c %c | %c %c %c \n", 
                 bb.boards[i][0].squares[k][0],
                 bb.boards[i][0].squares[k][1],
                 bb.boards[i][0].squares[k][2],
@@ -72,12 +76,22 @@ void printBoard() {
                 bb.boards[i][2].squares[k][2]);
         }
         if (i < 2) {
-            printf("_______|_______|_______\n");
+            printf("\t_______|_______|_______\n");
         }
         if (i < 2) {
-            printf("       |       |       \n");
+            printf("\t       |       |       \n");
         }
     }
+}
+
+void printTurn(){
+    char current_turn = (turns % 2 == 0) ? Player1 : Player2;
+    printf("%sPlayer %c now playing on board (%d,%d)%s\n", 
+    ORANGE, 
+    current_turn,
+    (lm.row + 1),
+    (lm.col + 1), 
+    RESET);
 }
 
 void playerMove(char board[SIZE][SIZE]) {
@@ -87,7 +101,8 @@ void playerMove(char board[SIZE][SIZE]) {
         printf("Select row (1-3): ");
         if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
             printBoard();
-            puts("\033[31mInvalid input! Please select a row between 1 and 3.\033[0m");
+            printTurn();
+            printf("%sInvalid input! Please select a row between 1 and 3.%s\n", RED, RESET);
             while (getchar() != '\n');
             continue;
         }
@@ -95,7 +110,8 @@ void playerMove(char board[SIZE][SIZE]) {
         printf("Select column (1-3): ");
         if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
             printBoard();
-            puts("\033[31mInvalid input! Please select a column between 1 and 3.\033[0m");
+            printTurn();
+            printf("%sInvalid input! Please select a column between 1 and 3.%s\n", RED, RESET);
             while (getchar() != '\n');
             continue;
         }
@@ -103,7 +119,8 @@ void playerMove(char board[SIZE][SIZE]) {
         y--;
         if (board[x][y] != ' ') {
             printBoard();
-            puts("\033[31mThat spot is already taken! Please select another spot.\033[0m");
+            printTurn();
+            printf("%sThat spot is already taken! Please select another spot.%s\n", RED, RESET);
             continue;
         }
 
@@ -118,11 +135,23 @@ void playerMove(char board[SIZE][SIZE]) {
 char (*pickBoard())[SIZE] {
     if (lm.row < 0 || lm.row >= SIZE || bb.boards[lm.row][lm.col].winner != ' ') {
         int board_row, board_col;
-        puts("\033[38;5;227mYou can choose any board for your next move.\033[0m");
-        printf("\033[38;5;227mPick next board Row (1-3): \033[0m");
-        scanf("%d", &board_row);
-        printf("\033[38;5;227mPick next board Column (1-3): \033[0m");
-        scanf("%d", &board_col);
+    
+        printf("%sYou can choose any board for your next move.%s\n", YELLOW,RESET);
+        do {
+            printf("%sPick Next Board Row (1-3): %s", YELLOW, RESET);
+            if (scanf("%d", &board_row) != 1 || board_row < 1 || board_row > 3) {
+                printf("%sInvalid input!%s\n", RED, RESET);
+                while (getchar() != '\n');
+                continue;
+            }
+            printf("%sPick Next Board Column (1-3): %s", YELLOW, RESET);
+            if (scanf("%d", &board_col) != 1 || board_col < 1 || board_col > 3) {
+                printf("%sInvalid input!%s\n", RED, RESET);
+                while (getchar() != '\n');
+                continue;
+            }
+        } while (board_col < 1 || board_col > 3 || board_row < 1 || board_row > 3 || bb.boards[board_row - 1][board_col - 1].winner != ' '); 
+
         lm.row = board_row - 1;
         lm.col = board_col - 1;
     }
@@ -164,12 +193,12 @@ void checkWinner() {
 }
 
 int main() {
-    puts("*** Welcome to Ultimate Tictactoe! ***\n");
+    printf("  ***%s Welcome to Ultimate Tictactoe!%s ***\n", YELLOW, RESET);
     resetBoard();
     while (bb.game_winner == ' ') {
         printBoard();
         char (*game_board)[SIZE] = pickBoard();
-        printf("\033[38;5;208mNow playing on board (%d,%d)\033[0m\n", (lm.row + 1),(lm.col + 1));
+        printTurn();
         playerMove(game_board);
         checkWinner();
     }
