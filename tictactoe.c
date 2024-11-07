@@ -24,6 +24,7 @@ const int Winning_Combinations[8][3][2] = {
 };
 
 int turns;
+int ultimate;
 
 typedef struct {
     char squares[SIZE][SIZE];
@@ -42,6 +43,45 @@ typedef struct {
 
 last_move lm;
 big_board bb;
+
+void resetBoard(void); 
+void printBoard(void); 
+void printTurn(void); 
+void playerMove(char board[SIZE][SIZE]); 
+char (*pickBoard(void))[SIZE]; 
+void checkSmallBoardWinner(small_board *sb); 
+void checkWinner(void); 
+
+int main() {
+    printf("%sSelect gamemode \n  1 - Normal Tic Tac Toe\n  2 - Ultimate Tic Tac Toe %s \n", YELLOW, RESET);
+    scanf("%d", &ultimate);
+    ultimate--;
+    if (ultimate == 1){
+        printf("%sNow playing Ultimate Tic Tac Toe%s\n", ORANGE, RESET);
+    } else if (ultimate == 0){
+        printf("%sNow playing Normal Tic Tac Toe%s\n", ORANGE, RESET);
+    } else {
+        puts("Game over");
+        return 0;
+    }
+
+    resetBoard();
+    while (bb.game_winner == ' ') {
+        printBoard();
+        char (*game_board)[SIZE];
+        if (ultimate){
+            game_board = pickBoard();
+        } else {
+            game_board = (char (*)[SIZE]) bb.boards;
+        }
+        printTurn();
+        playerMove(game_board);
+        checkWinner();
+    }
+
+    printf("Player %c wins the game!\n", bb.game_winner);
+    return 0;
+}
 
 void resetBoard() {
     for (int i = 0; i < SIZE; i++) {
@@ -63,17 +103,17 @@ void printBoard() {
     for (int i = 0; i < SIZE; i++) {
         for (int k = 0; k < SIZE; k++) {
             printf("\t %c %c %c | %c %c %c | %c %c %c \n", 
-                bb.boards[i][0].squares[k][0],
-                bb.boards[i][0].squares[k][1],
-                bb.boards[i][0].squares[k][2],
+                ultimate ? bb.boards[i][0].squares[k][0] : bb.boards[i][0].winner,
+                ultimate ? bb.boards[i][0].squares[k][1] : bb.boards[i][0].winner,
+                ultimate ? bb.boards[i][0].squares[k][2] : bb.boards[i][0].winner,
 
-                bb.boards[i][1].squares[k][0],
-                bb.boards[i][1].squares[k][1],
-                bb.boards[i][1].squares[k][2],
+                ultimate ? bb.boards[i][1].squares[k][0] : bb.boards[i][1].winner,
+                ultimate ? bb.boards[i][1].squares[k][1] : bb.boards[i][1].winner,
+                ultimate ? bb.boards[i][1].squares[k][2] : bb.boards[i][1].winner,
 
-                bb.boards[i][2].squares[k][0],
-                bb.boards[i][2].squares[k][1],
-                bb.boards[i][2].squares[k][2]);
+                ultimate ? bb.boards[i][2].squares[k][0] : bb.boards[i][2].winner,
+                ultimate ? bb.boards[i][2].squares[k][1] : bb.boards[i][2].winner,
+                ultimate ? bb.boards[i][2].squares[k][2] : bb.boards[i][2].winner);
         }
         if (i < 2) {
             printf("\t_______|_______|_______\n");
@@ -86,12 +126,14 @@ void printBoard() {
 
 void printTurn(){
     char current_turn = (turns % 2 == 0) ? Player1 : Player2;
-    printf("%sPlayer %c now playing on board (%d,%d)%s\n", 
-    ORANGE, 
-    current_turn,
+    printf("%sPlayer %c's turn%s\n", ORANGE, current_turn, RESET);
+    if (ultimate){
+    printf("%sNow playing on board (%d,%d)%s\n", 
+    ORANGE,
     (lm.row + 1),
     (lm.col + 1), 
     RESET);
+    }
 }
 
 void playerMove(char board[SIZE][SIZE]) {
@@ -101,7 +143,7 @@ void playerMove(char board[SIZE][SIZE]) {
         printf("Select row (1-3): ");
         if (scanf("%d", &x) != 1 || x < 1 || x > 3) {
             printBoard();
-            printTurn();
+            printTurn(); 
             printf("%sInvalid input! Please select a row between 1 and 3.%s\n", RED, RESET);
             while (getchar() != '\n');
             continue;
@@ -110,7 +152,7 @@ void playerMove(char board[SIZE][SIZE]) {
         printf("Select column (1-3): ");
         if (scanf("%d", &y) != 1 || y < 1 || y > 3) {
             printBoard();
-            printTurn();
+            printTurn(); 
             printf("%sInvalid input! Please select a column between 1 and 3.%s\n", RED, RESET);
             while (getchar() != '\n');
             continue;
@@ -119,14 +161,19 @@ void playerMove(char board[SIZE][SIZE]) {
         y--;
         if (board[x][y] != ' ') {
             printBoard();
-            printTurn();
+            printTurn(); 
             printf("%sThat spot is already taken! Please select another spot.%s\n", RED, RESET);
             continue;
         }
 
-        board[x][y] = (turns % 2 == 0) ? Player1 : Player2; 
-        lm.col = y;
-        lm.row = x;
+        if (ultimate){
+            board[x][y] = (turns % 2 == 0) ? Player1 : Player2; 
+            lm.col = y;
+            lm.row = x;
+        } else {
+            bb.boards[x][y].winner = (turns % 2 == 0) ? Player1 : Player2; 
+        }
+
         turns++;
         break;
     }
@@ -190,19 +237,4 @@ void checkWinner() {
             return;
         }
     }
-}
-
-int main() {
-    printf("  ***%s Welcome to Ultimate Tictactoe!%s ***\n", YELLOW, RESET);
-    resetBoard();
-    while (bb.game_winner == ' ') {
-        printBoard();
-        char (*game_board)[SIZE] = pickBoard();
-        printTurn();
-        playerMove(game_board);
-        checkWinner();
-    }
-
-    printf("Player %c wins the game!\n", bb.game_winner);
-    return 0;
 }
